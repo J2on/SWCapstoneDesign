@@ -56,17 +56,32 @@ void ASCD_MediaPipeGameModeBase::ReceiveFloatArrayFromPython()
 	Socket->Recv(reinterpret_cast<uint8*>(&ReceivedFloatData7), sizeof(float), BytesRead);*/
 
 	int32 BytesRead = 0;
-	char ReceivedStringBuffer[64]; // 적절한 크기로 설정
-	Socket->Recv(reinterpret_cast<uint8*>(ReceivedStringBuffer), 64, BytesRead);
+	char ReceivedStringBuffer[448]; // 적절한 크기로 설정
+	Socket->Recv(reinterpret_cast<uint8*>(ReceivedStringBuffer), 448, BytesRead);
 
-	// 문자열을 FLOAT 값으로 변환
-	float ReceivedFloatData1 = atof(ReceivedStringBuffer);
-
-	if(ReceivedFloatData1)
+	TArray<float> ReceivedFloatDatas;
+	FString ReceivedStringElement;
+	for(auto& ch : ReceivedStringBuffer)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Received float value: %f"), ReceivedFloatData1);
+		if(ch == ' ')
+		{
+			// 문자열을 FLOAT 값으로 변환
+			ReceivedFloatDatas.Add(FCString::Atof(*ReceivedStringElement));
+			ReceivedStringElement = TEXT("");
+		}
+		else
+		{
+			ReceivedStringElement += ch;
+		}
 	}
+	
 
+	for(int i = 0; i < ReceivedFloatDatas.Num(); i++)
+	{
+		float f = ReceivedFloatDatas[i];
+		UE_LOG(LogTemp, Warning, TEXT("Received float value: %f"), f);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("-------------------------------------"));
 	// 소켓 닫기
 	Socket->Close();
 
