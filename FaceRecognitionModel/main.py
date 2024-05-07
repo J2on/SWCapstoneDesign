@@ -3,6 +3,40 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
+import tensorflow as tf
+
+
+# Define Intensity-aware Loss (L_IA) function
+def intensity_aware_loss(y_true, y_pred):
+    # Apply one-hot encoding to y_true
+    num_classes = 5
+    y_true = tf.cast(y_true, dtype=tf.int32)
+    y_true_encoded = tf.one_hot(y_true, depth= num_classes)
+
+    # Reshape y_true_encoded to match the shape of y_pred
+    y_true_encoded = tf.reshape(y_true_encoded, (-1, num_classes))
+
+    # Calculate PIA
+    xt = y_pred * y_true_encoded  # Logits of the target class
+    xmax = tf.reduce_max(y_pred * (1 - y_true_encoded), axis=1,
+                         keepdims=True)  # Maximum logits excluding the target class
+    numerator = tf.exp(xt)
+    denominator = tf.exp(xt) + tf.exp(xmax)
+    PIA = numerator / denominator
+
+    # Calculate L_IA
+    LIA = -tf.math.log(PIA)
+    LIA_mean = tf.reduce_mean(LIA, axis=1)  # Compute mean LIA across classes
+
+    # Cross-entropy loss
+    cross_entropy_loss = tf.keras.losses.sparse_categorical_crossentropy(y_true, y_pred)
+
+    # Combine cross-entropy loss and L_IA loss
+    total_loss = cross_entropy_loss + LIA_mean
+
+    return tf.reduce_mean(total_loss)
+
+
 
 # 데이터 파일 경로
 file_paths = ["Happy.txt", "Sad.txt", "Surprise.txt", "Normal.txt", "Disgust.txt"]
@@ -44,11 +78,17 @@ X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, 
 model = Sequential([
     Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
     Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
+    Dense(64, activation='relu'),
     Dense(5, activation='sigmoid')  # 출력 레이어에 Sigmoid 활성화 함수 추가  처음에는 Softmax로 각 레이블 마다의 확률로 나타내보자 했지만 sigmoid로 해도 괜찮다면
 ])
 
-# 모델 컴파일
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+# 모델 컴파일 <- Intensity Aware Loss 적용
+model.compile(optimizer='adam', loss = intensity_aware_loss, metrics=['accuracy'])
 
 # 모델 훈련
 model.fit(X_train, y_train, epochs=30, batch_size=32, validation_split=0.2)
@@ -72,6 +112,7 @@ for file_path in file_paths_Two:
     with open(file_path, 'r') as file:
         data_lines = file.readlines()
         for line in data_lines:
+
             # 각 줄에서 데이터 추출
             line_data = line.strip().split()
             # 특성과 타깃 분리
@@ -79,6 +120,7 @@ for file_path in file_paths_Two:
             # 리스트에 추가
             Normal_X.append(X_line)
             Y.append(float(lable))
+
         lable += 1
 
 TestX_np = np.array(Normal_X)
