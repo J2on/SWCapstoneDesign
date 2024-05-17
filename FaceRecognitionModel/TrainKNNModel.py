@@ -18,21 +18,33 @@ for i in range (0,175):
 filePathSad = []
 for i in range (0,169):
     filePathSad.append(f"Data/Sad/Sad{i}.txt");
-filePathFear = []
-for i in range (0,50):
-    filePathFear.append(f"Data/Fear/Fear{i}.txt");
+filePathNeutral = []
+for i in range(0, 199):
+    filePathNeutral.append(f"Data/Neutral/Neutral{i}.txt");
+filePathAngry = []
+for i in range(0, 146):
+    filePathAngry.append(f"Data/Angry/Angry{i}.txt");
+filePathSurprise = []
+for i in range (0,89):
+    filePathSurprise.append(f"Data/Surprise/Surprise{i}.txt");
 filePathDisgust = []
 for i in range (0,8):
     filePathDisgust.append(f"Data/Disgust/Disgust{i}.txt");
-filePathAngry = []
-for i in range (0,146):
-    filePathAngry.append(f"Data/Angry/Angry{i}.txt");
+filePathFear = []
+for i in range (0,50):
+    filePathFear.append(f"Data/Fear/Fear{i}.txt");
+
+
+
 
 filePaths.append(filePathHappy)
 filePaths.append(filePathSad)
-filePaths.append(filePathFear)
-filePaths.append(filePathDisgust)
+filePaths.append(filePathNeutral)
 filePaths.append(filePathAngry)
+filePaths.append(filePathSurprise)
+filePaths.append(filePathDisgust)
+filePaths.append(filePathFear)
+
 
 #file_paths = ["Happy.txt", "Sad.txt", "Surprise.txt", "Normal.txt", "Disgust.txt"]
 # 모든 데이터를 저장할 리스트 초기화
@@ -65,7 +77,7 @@ Y = np.array(all_y)
 # 데이터 분할 (훈련 세트와 테스트 세트)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
-knn_model = KNeighborsClassifier(n_neighbors=5)  # K값은 5로 설정합니다. 다른 값을 선택할 수도 있습니다.
+knn_model = KNeighborsClassifier(n_neighbors=10)  # K값은 5로 설정합니다. 다른 값을 선택할 수도 있습니다.
 
 # 모델 훈련
 knn_model.fit(X_train, y_train)

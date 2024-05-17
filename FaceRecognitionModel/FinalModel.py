@@ -1,4 +1,6 @@
 import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
 from joblib import dump, load
 
 def knn_class_probabilities(knn_model, X_new):
@@ -12,6 +14,22 @@ def knn_class_probabilities(knn_model, X_new):
 
     return class_probabilities
 
+
+def knn_neighbors_distribution(knn_model, X_new):
+    # k개의 최근접 이웃의 인덱스 가져오기
+    distances, indices = knn_model.kneighbors(X_new, n_neighbors=knn_model.n_neighbors)
+
+    # 최근접 이웃의 레이블 가져오기
+    neighbor_labels = knn_model._y[indices]
+
+    distributions = [0,0,0,0,0,0,0]
+    for labels in neighbor_labels:
+        # 각 레이블의 분포 비율 계산
+        unique, counts = np.unique(labels, return_counts=True)
+        for i in range(len(unique)):
+            distributions[i] = counts[i] / knn_model.n_neighbors
+
+    return distributions
 
 # 모델 로드
 loaded_knn_model = load('knn_model.joblib')
@@ -41,7 +59,10 @@ for file_path in file_paths_Two:
             Normal_X.append(X_line)
             Y.append(float(lable))
             class_probabilities = knn_class_probabilities(loaded_knn_model, np.array(Normal_X))
-            print("Class Probabilities:", class_probabilities, " Label : ", lable)
+            distances, indices = loaded_knn_model.kneighbors(Normal_X)
+            distributions = knn_neighbors_distribution(loaded_knn_model, Normal_X)
+            print(distributions)
+            #print("Class Probabilities:", class_probabilities, " Label : ", lable)
 
         lable += 1
 #

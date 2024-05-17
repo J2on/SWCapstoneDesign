@@ -6,6 +6,23 @@ import struct
 import numpy as np
 from joblib import dump, load
 
+
+def knn_neighbors_distribution(knn_model, X_new):
+    # k개의 최근접 이웃의 인덱스 가져오기
+    distances, indices = knn_model.kneighbors(X_new, n_neighbors=knn_model.n_neighbors)
+
+    # 최근접 이웃의 레이블 가져오기
+    neighbor_labels = knn_model._y[indices]
+
+    distributions = [0,0,0,0,0,0,0]
+    for labels in neighbor_labels:
+        # 각 레이블의 분포 비율 계산
+        unique, counts = np.unique(labels, return_counts=True)
+        for i in range(len(unique)):
+            distributions[i] = counts[i] / knn_model.n_neighbors
+
+    return distributions
+
 if __name__ == '__main__':
     # 모델 로드
     loaded_knn_model = load('knn_model.joblib')
@@ -38,10 +55,15 @@ if __name__ == '__main__':
 
         print("Data 송신 준비")
 
-        predictions = loaded_knn_model.predict(received_data.reshape(1, -1))
-        SendData = str(predictions)
+        #predictions = loaded_knn_model.predict(received_data.reshape(1, -1))
+        # SendData = str(predictions)
+        # print(SendData)
+        # conn.send(SendData.encode('utf-8'))
+        distributions = knn_neighbors_distribution(loaded_knn_model, received_data.reshape(1, -1))
+        SendData = ''
+        for dist in distributions:
+            SendData = SendData + str(dist) + ' '
         print(SendData)
         conn.send(SendData.encode('utf-8'))
-
         print('데이터 전송 완료')
     conn.close()
