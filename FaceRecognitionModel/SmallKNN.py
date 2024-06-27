@@ -13,19 +13,19 @@ from joblib import dump, load
 filePaths = []
 
 filePathHappy = []
-for i in range (0,175):
+for i in range (0,50):
     filePathHappy.append(f"Data/Happy/Happy{i}.txt");
 filePathSad = []
-for i in range (0,169):
+for i in range (0,50):
     filePathSad.append(f"Data/Sad/Sad{i}.txt");
 filePathNeutral = []
-for i in range(0, 199):
+for i in range(0, 50):
     filePathNeutral.append(f"Data/Neutral/Neutral{i}.txt");
 filePathAngry = []
-for i in range(0, 146):
+for i in range(0, 50):
     filePathAngry.append(f"Data/Angry/Angry{i}.txt");
 filePathSurprise = []
-for i in range (0,89):
+for i in range (0,50):
     filePathSurprise.append(f"Data/Surprise/Surprise{i}.txt");
 filePathDisgust = []
 for i in range (0,8):
@@ -74,10 +74,6 @@ for path_Emotion in filePaths:
 X = np.array(all_X)
 Y = np.array(all_y)
 
-np.save('X.npy', X)
-np.save('y.npy', Y)
-
-
 # 데이터 분할 (훈련 세트와 테스트 세트)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
@@ -91,7 +87,7 @@ accuracy = knn_model.score(X_test, y_test)
 print("Test set accuracy: {:.2f}".format(accuracy))
 
 # 모델 저장
-dump(knn_model, 'knn_model.joblib')
+dump(knn_model, 'Small_knn_model.joblib')
 
 
 ##################################################### TEST #############################################################
